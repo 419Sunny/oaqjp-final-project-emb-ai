@@ -22,6 +22,11 @@
             color: #1a73e8;
             text-align: center;
         }
+        .description {
+            text-align: center;
+            color: #666;
+            margin-bottom: 20px;
+        }
         textarea {
             width: 100%;
             padding: 10px;
@@ -30,6 +35,7 @@
             font-size: 16px;
             font-family: inherit;
             resize: vertical;
+            box-sizing: border-box;
         }
         button {
             background-color: #1a73e8;
@@ -51,17 +57,31 @@
             border-radius: 5px;
             display: none;
             white-space: pre-wrap;
+            word-wrap: break-word;
         }
         .error {
             background-color: #fce8e6 !important;
             color: #d93025;
+            border-left: 4px solid #d93025;
+        }
+        .success {
+            background-color: #e8f0fe !important;
+            color: #1a73e8;
+            border-left: 4px solid #1a73e8;
+        }
+        .loading {
+            background-color: #fff3e0 !important;
+            color: #f9ab00;
+            border-left: 4px solid #f9ab00;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Emotion Detection App</h1>
-        <p>Enter customer feedback to analyze emotions:</p>
+        <div class="description">
+            Enter customer feedback to analyze emotions
+        </div>
         
         <form id="emotionForm">
             <textarea id="text" name="text" rows="4" 
@@ -78,16 +98,18 @@
             const text = document.getElementById('text').value;
             const resultDiv = document.getElementById('result');
             
+            // Check for blank input on client side as well
             if (!text.trim()) {
-                resultDiv.textContent = 'Please enter some text to analyze.';
+                resultDiv.textContent = 'Invalid text! Please try again!';
                 resultDiv.style.display = 'block';
-                resultDiv.classList.add('error');
+                resultDiv.className = 'error';
                 return;
             }
             
-            resultDiv.textContent = 'Analyzing...';
+            // Show loading state
+            resultDiv.textContent = 'Analyzing emotions...';
             resultDiv.style.display = 'block';
-            resultDiv.classList.remove('error');
+            resultDiv.className = 'loading';
             
             try {
                 const response = await fetch('/emotionDetector', {
@@ -99,10 +121,16 @@
                 });
                 const data = await response.text();
                 resultDiv.textContent = data;
-                resultDiv.classList.remove('error');
+                
+                // Check if the response is an error message
+                if (data === 'Invalid text! Please try again!' || data.includes('Invalid text')) {
+                    resultDiv.className = 'error';
+                } else {
+                    resultDiv.className = 'success';
+                }
             } catch (error) {
                 resultDiv.textContent = 'Error connecting to server. Please try again.';
-                resultDiv.classList.add('error');
+                resultDiv.className = 'error';
             }
         };
     </script>
